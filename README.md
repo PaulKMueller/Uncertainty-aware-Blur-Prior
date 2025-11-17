@@ -1,5 +1,9 @@
 # Uncertainty-aware Blur Prior (UBP)
 
+> [!WARNING]
+> This fork updates a lot of the original project's dependencies and makes it more reproducible.
+> It also includes some code style updates and changes to functionality to iterate on the concept of UBP.
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Repo Architecture](#repo-architecture)
@@ -46,13 +50,11 @@ UBP/                           # Root directory
     └── exp.sh                 # Bash script for running experiments
 ```
 ## Environment Setup
-- Python 3.8.19
-- Cuda 12.0
-- PyTorch 2.4.1
-- Required libraries are listed in `requirements.txt`.
 
-```
-pip install -r requirements.txt
+Make sure you have [pixi](https://pixi.sh/dev/installation/) installed and run the following:
+```bash
+pixi install
+pixi run pci
 ```
 
 ## Data Preparation
@@ -60,22 +62,22 @@ pip install -r requirements.txt
 
 Recommendation: things.zip, things-eeg.zip, things-meg.zip is necessary, other files are optional.
 
-3a. Resize the downloaded images using the provided script:
+2. Resize the downloaded images using the provided script:
 
-```
+```bash
 python preprocess/process_resize.py --type eeg
 python preprocess/process_resize.py --type meg
 ```
 
-3b. Convert the data to .pt format using the preprocessing script for all subjects:
+3. Convert the data to .pt format using the preprocessing script for all subjects:
 
-```
-/bin/bash scripts/bash_preprocess.sh
+```bash
+chmod +x scripts/bash_preprocess.sh
 ```
 
 
 Finally, we have the directory tree:
-```
+```bash
 ├── data
     ├── things-eeg
         ├── Image_set
@@ -94,11 +96,11 @@ Finally, we have the directory tree:
 ```
 ## Run
 To run the experiments using the provided configurations, execute:
-```
+```bash
 /bin/bash scripts/exp.sh
 ```
 
-```
+```bash
 brain_backbone="EEGProjectLayer"
 vision_backbone="RN50"
 i="01"
