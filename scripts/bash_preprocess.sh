@@ -2,11 +2,12 @@
 # cd /xxxx/Uncertainty-aware-Blur-Prior
 
 ## EEG
-for subject in {1..10}
-do
-  python preprocess/process_eeg_whiten.py --subject $subject
-done
+# for subject in {1..10}
+# do
+  # python preprocess/process_eeg_whiten.py --subject $subject
+# done
 
+python preprocess/process_eeg_whiten.py --subject 4
 ## MEG
 # for subject in {1..4}
 # do
