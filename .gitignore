@@ -13,4 +13,6 @@
 __pycache__/
 **/__pycache__/
 
-**/lightning_logs/**
+**/lightning_logs/**# pixi environments
+.pixi/*
+!.pixi/config.toml

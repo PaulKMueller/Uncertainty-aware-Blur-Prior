@@ -60,18 +60,19 @@ pip install -r requirements.txt
 
 Recommendation: things.zip, things-eeg.zip, things-meg.zip is necessary, other files are optional.
 
-3. Convert the data to .pt format using the preprocessing script for all subjects:
-
-```
-/bin/bash scripts/bash_preprocess.sh
-```
-
-3. Resize the downloaded images using the provided script:
+3a. Resize the downloaded images using the provided script:
 
 ```
 python preprocess/process_resize.py --type eeg
 python preprocess/process_resize.py --type meg
 ```
+
+3b. Convert the data to .pt format using the preprocessing script for all subjects:
+
+```
+/bin/bash scripts/bash_preprocess.sh
+```
+
 
 Finally, we have the directory tree:
 ```
@@ -136,4 +137,3 @@ If you find our work helpful, please cite:
 
 ## Contact us
 For any additional questions, feel free to email wuhaitao@tju.edu.cn .
-

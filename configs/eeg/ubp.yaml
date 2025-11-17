@@ -38,5 +38,5 @@ train:
   epoch: ${epoch}
   optimizer: AdamW
   lr: ${lr}
-  
+
 save_dir: 'exp'

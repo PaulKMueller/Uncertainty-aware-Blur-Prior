@@ -1,0 +1,25 @@
+[workspace]
+authors = ["PaulKMueller <paulkonstantinmueller@gmail.com>"]
+channels = ["conda-forge"]
+name = "Uncertainty-aware-Blur-Prior"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[feature.lint.tasks]
+pci = "pre-commit install"
+pc = "pre-commit run --all"
+[dependencies]
+pytorch-gpu = "*"
+mne = ">=1.10.2,<2"
+torchvision = ">=0.12.0,<0.13"
+
+
+[feature.lint.dependencies]
+pre-commit = ">=4.3.0,<5"
+
+
+[environments]
+lint = ["lint"]
+default = ["default"]
