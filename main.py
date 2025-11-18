@@ -153,7 +153,9 @@ class PLModel(pl.LightningModule):
             counter = Counter(self.match_label)
             count_dict = dict(counter)
             key_mapping = {0: "low", 1: "medium", 2: "high"}
-            count_dict_mapped = {key_mapping[k]: v for k, v in count_dict.items()}
+            count_dict_mapped = {
+                key_mapping[k]: float(v) for k, v in count_dict.items()
+            }
             self.log_dict(
                 count_dict_mapped,
                 on_step=False,
@@ -288,8 +290,7 @@ class PLModel(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        optimizer_cls = getattr(torch.optim, self.config["train"]["optimizer"])
-        optimizer = optimizer_cls(
+        optimizer = globals()[self.config["train"]["optimizer"]](
             self.parameters(), lr=self.config["train"]["lr"], weight_decay=1e-4
         )
 
