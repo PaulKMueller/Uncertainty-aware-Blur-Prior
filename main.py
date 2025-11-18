@@ -137,6 +137,7 @@ class PLModel(pl.LightningModule):
                 prog_bar=True,
                 logger=True,
                 sync_dist=True,
+                batch_size=batch_size,
             )
             self.log(
                 "train_top5_acc",
@@ -146,6 +147,7 @@ class PLModel(pl.LightningModule):
                 prog_bar=True,
                 logger=True,
                 sync_dist=True,
+                batch_size=batch_size,
             )
             self.all_predicted_classes = []
             self.all_true_labels = []
@@ -163,7 +165,7 @@ class PLModel(pl.LightningModule):
                 logger=True,
                 sync_dist=True,
             )
-            self.trainer.train_dataloader.dataset.match_label = self.match_label
+
         return loss
 
     def validation_step(self, batch, batch_idx):
