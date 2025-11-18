@@ -164,6 +164,7 @@ class PLModel(pl.LightningModule):
                 on_epoch=True,
                 logger=True,
                 sync_dist=True,
+                batch_size=batch_size,
             )
 
         return loss
