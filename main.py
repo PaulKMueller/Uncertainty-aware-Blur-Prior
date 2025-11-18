@@ -292,7 +292,8 @@ class PLModel(pl.LightningModule):
         }
 
     def configure_optimizers(self):
-        optimizer = globals()[self.config["train"]["optimizer"]](
+        optimizer_cls = getattr(torch.optim, self.config["train"]["optimizer"])
+        optimizer = optimizer_cls(
             self.parameters(), lr=self.config["train"]["lr"], weight_decay=1e-4
         )
 
