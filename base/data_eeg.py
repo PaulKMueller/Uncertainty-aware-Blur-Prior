@@ -34,7 +34,7 @@ def load_eeg_data(config):
             batch_size=config["data"]["train_batch_size"],
             shuffle=True,
             drop_last=False,
-            num_workers=32,
+            num_workers=24,  # This should be changed based on the machine you are working on
             pin_memory=True,
         )
         return train_loader, test_loader, test_loader
