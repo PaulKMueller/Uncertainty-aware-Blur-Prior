@@ -16,3 +16,6 @@ __pycache__/
 **/lightning_logs/**# pixi environments
 .pixi/*
 !.pixi/config.toml
+
+*.prof
+*.swp

@@ -27,106 +27,43 @@ args = get_args_parser()
 sub = args.subject
 
 
-n_ses = 4
+NUMBER_OF_SESSIONS = 4
+PROFILING_DIR = "profiling"
+os.makedirs(PROFILING_DIR, exist_ok=True)
 
-seed = 20200220
-re_sfreq = 250
+SEED = 20200220
+RESAMPLING_FREQUENCY = 250
 tmin = -0.2
 tmax = 1.0
-whiten = True
+WHITEN = True
 
-project_dir = "data/things-eeg"
+PROJECT_DIR = "data/things-eeg"
 
-if whiten:
+if WHITEN:
     save_dir = os.path.join(
-        project_dir,
-        f"Preprocessed_data_{re_sfreq}Hz_whiten",
+        PROJECT_DIR,
+        f"Preprocessed_data_{RESAMPLING_FREQUENCY}Hz_whiten",
         "sub-" + format(sub, "02"),
     )
 else:
     save_dir = os.path.join(
-        project_dir,
-        f"Preprocessed_data_{re_sfreq}Hz_no_whiten",
+        PROJECT_DIR,
+        f"Preprocessed_data_{RESAMPLING_FREQUENCY}Hz_no_whiten",
         "sub-" + format(sub, "02"),
     )
 os.makedirs(save_dir, exist_ok=True)
 
-chan_order = [
-    "Fp1",
-    "Fp2",
-    "AF7",
-    "AF3",
-    "AFz",
-    "AF4",
-    "AF8",
-    "F7",
-    "F5",
-    "F3",
-    "F1",
-    "F2",
-    "F4",
-    "F6",
-    "F8",
-    "FT9",
-    "FT7",
-    "FC5",
-    "FC3",
-    "FC1",
-    "FCz",
-    "FC2",
-    "FC4",
-    "FC6",
-    "FT8",
-    "FT10",
-    "T7",
-    "C5",
-    "C3",
-    "C1",
-    "Cz",
-    "C2",
-    "C4",
-    "C6",
-    "T8",
-    "TP9",
-    "TP7",
-    "CP5",
-    "CP3",
-    "CP1",
-    "CPz",
-    "CP2",
-    "CP4",
-    "CP6",
-    "TP8",
-    "TP10",
-    "P7",
-    "P5",
-    "P3",
-    "P1",
-    "Pz",
-    "P2",
-    "P4",
-    "P6",
-    "P8",
-    "PO7",
-    "PO3",
-    "POz",
-    "PO4",
-    "PO8",
-    "O1",
-    "Oz",
-    "O2",
-]
-mvnn_dim = "epochs"
+CHANNEL_ORDER = [ "Fp1", "Fp2", "AF7", "AF3", "AFz", "AF4", "AF8", "F7", "F5", "F3", "F1", "F2", "F4", "F6", "F8", "FT9", "FT7", "FC5", "FC3", "FC1", "FCz", "FC2", "FC4", "FC6", "FT8", "FT10", "T7", "C5", "C3", "C1", "Cz", "C2", "C4", "C6", "T8", "TP9", "TP7", "CP5", "CP3", "CP1", "CPz", "CP2", "CP4", "CP6", "TP8", "TP10", "P7", "P5", "P3", "P1", "Pz", "P2", "P4", "P6", "P8", "PO7", "PO3", "POz", "PO4", "PO8", "O1", "Oz", "O2", ]  # fmt: skip
+MVNN_DIM = "epochs"
+STIM_CHANNEL = "stim"
 
 
 def mvnn(epoched_test, epoched_train):
-    ### Loop across data collection sessions ###
     whitened_test = []
     whitened_train = []
-    for s in tqdm(range(n_ses), desc="MVNN whitening sessions"):
+    for s in tqdm(range(NUMBER_OF_SESSIONS), desc="MVNN whitening sessions"):
         session_data = [epoched_test[s], epoched_train[s]]
 
-        ### Compute the covariance matrices ###
         # Data partitions covariance matrix of shape:
         # Data partitions × EEG channels × EEG channels
         sigma_part = np.empty(
@@ -146,7 +83,7 @@ def mvnn(epoched_test, epoched_train):
                 cond_data = session_data[p][i]
                 # Compute covariace matrices at each time point, and then
                 # average across time points
-                if mvnn_dim == "time":
+                if MVNN_DIM == "time":
                     sigma_cond[i] = np.mean(
                         [
                             _cov(cond_data[:, :, t], shrinkage="auto")
@@ -156,7 +93,7 @@ def mvnn(epoched_test, epoched_train):
                     )
                 # Compute covariace matrices at each epoch (EEG repetition),
                 # and then average across epochs/repetitions
-                elif mvnn_dim == "epochs":
+                elif MVNN_DIM == "epochs":
                     sigma_cond[i] = np.mean(
                         [
                             _cov(np.transpose(cond_data[e]), shrinkage="auto")
@@ -199,7 +136,6 @@ def mvnn(epoched_test, epoched_train):
             )
         )
 
-    ### Output ###
     return whitened_test, whitened_train
 
 
@@ -207,7 +143,9 @@ def epoch_data(mode, sub, use_decim=True):
     epoched_data = []
     img_conditions = []
 
-    for s in tqdm(range(n_ses), desc=f"Epoching {mode} data for subject {sub}"):
+    for s in tqdm(
+        range(NUMBER_OF_SESSIONS), desc=f"Epoching {mode} data for subject {sub}"
+    ):
         ### Load the EEG data ###
         eeg_dir = os.path.join(
             "Raw_data",
@@ -215,9 +153,8 @@ def epoch_data(mode, sub, use_decim=True):
             "ses-" + format(s + 1, "02"),
             f"raw_eeg_{mode}.npy",
         )
-        eeg_data = np.load(os.path.join(project_dir, eeg_dir), allow_pickle=True).item()
+        eeg_data = np.load(os.path.join(PROJECT_DIR, eeg_dir), allow_pickle=True).item()
 
-        # Create MNE Raw
         info = mne.create_info(
             eeg_data["ch_names"], eeg_data["sfreq"], eeg_data["ch_types"]
         )
@@ -225,36 +162,30 @@ def epoch_data(mode, sub, use_decim=True):
         raw = mne.io.RawArray(eeg_data["raw_eeg_data"], info)
         sfreq = raw.info["sfreq"]
 
-        events = mne.find_events(raw, stim_channel="stim", verbose=False)
+        events = mne.find_events(raw, stim_channel=STIM_CHANNEL, verbose=False)
 
-        ### DECIMATION / RESAMPLING LOGIC ###
         decim_factor = 1
 
         # Check if we want to use decimation and if the math works (must be integer)
-        if use_decim and (sfreq % re_sfreq == 0):
-            decim_factor = int(sfreq / re_sfreq)
-            # print(f"Optimization: Using decimation (factor {decim_factor})")
+        if use_decim and (sfreq % RESAMPLING_FREQUENCY == 0):
+            decim_factor = int(sfreq / RESAMPLING_FREQUENCY)
 
-            # CRITICAL: Anti-aliasing filter before decimation
             # We filter at Nyquist / 1.5 (re_sfreq / 3.0) to be safe
-            raw.filter(l_freq=None, h_freq=re_sfreq / 3.0, n_jobs=-1, verbose=False)
-
-        elif re_sfreq < sfreq:
-            # Fallback to slow resampling if ratios don't match or use_decim is False
-            print(f"Resampling raw data from {sfreq}Hz to {re_sfreq}Hz...")
-            raw, events = raw.resample(
-                re_sfreq, events=events, n_jobs=-1, stim_picks="stim"
+            raw.filter(
+                l_freq=None, h_freq=RESAMPLING_FREQUENCY / 3.0, n_jobs=-1, verbose=False
             )
 
-        ### Pick Channels & Clean Events ###
-        raw.pick_channels(chan_order, ordered=True)
+        elif RESAMPLING_FREQUENCY < sfreq:
+            # Fallback to slow resampling if ratios don't match or use_decim is False
+            print(f"Resampling raw data from {sfreq}Hz to {RESAMPLING_FREQUENCY}Hz...")
+            raw, events = raw.resample(
+                RESAMPLING_FREQUENCY, events=events, n_jobs=-1, stim_picks=STIM_CHANNEL
+            )
+
+        raw.pick_channels(CHANNEL_ORDER, ordered=True)
         idx_target = np.where(events[:, 2] == 99999)[0]
         events = np.delete(events, idx_target, 0)
 
-        ### Epoching ###
-        # We pass the calculated 'decim_factor' here.
-        # If we resampled earlier, decim_factor is 1.
-        # If we are decimating, decim_factor is 4 (e.g., 1000->250).
         epochs = mne.Epochs(
             raw,
             events,
@@ -266,13 +197,8 @@ def epoch_data(mode, sub, use_decim=True):
             verbose=False,
         )
 
-        ### Optimization: Crop early to save RAM ###
-        # Your original code sliced the array at the very end: [:, :, :, -re_sfreq:]
-        # This is equivalent to keeping the last 1.0 second (assuming re_sfreq samples = 1s)
-        # We do it here to make the 'data' array smaller immediately.
         epochs.crop(tmin=tmax - 1.0, tmax=tmax)
 
-        ### Sort the data ###
         data = epochs.get_data()
         times = epochs.times
         events = epochs.events[:, 2]
@@ -287,7 +213,7 @@ def epoch_data(mode, sub, use_decim=True):
 
         for i in range(len(img_cond)):
             idx = np.where(events == img_cond[i])[0]
-            idx = shuffle(idx, random_state=seed, n_samples=max_rep)
+            idx = shuffle(idx, random_state=SEED, n_samples=max_rep)
             sorted_data[i] = data[idx]
 
         epoched_data.append(sorted_data)
@@ -300,7 +226,7 @@ with cProfile.Profile() as profiler:
     eeg_test, _, ch_names, times = epoch_data("test", sub)
     eeg_train, img_conditions_train, _, _ = epoch_data("training", sub)
 
-    if whiten:
+    if WHITEN:
         whitened_test, whitened_train = mvnn(eeg_test, eeg_train)
         del eeg_test, eeg_train
     else:
@@ -308,7 +234,7 @@ with cProfile.Profile() as profiler:
         whitened_train = eeg_train
 
     session_list = np.zeros((200, 80))
-    for s in range(n_ses):
+    for s in range(NUMBER_OF_SESSIONS):
         if s == 0:
             merged_test = whitened_test[s]
         else:
@@ -348,11 +274,6 @@ with cProfile.Profile() as profiler:
     img_list = np.tile(np.array(images)[:, np.newaxis], (1, 80))
     labels_list = np.tile(np.array(labels)[:, np.newaxis], (1, 80))
     text_list = np.tile(np.array(texts)[:, np.newaxis], (1, 80))
-    # print(merged_test.shape, merged_test.dtype)
-    # print(img_list.shape)
-    # print(labels_list.shape, labels_list.dtype)
-    # print(img_list[0, 0].split("/")[-1].rsplit("_", 1)[0])
-    # print(text_list.shape)
 
     test_dict = {
         "eeg": merged_test.astype(np.float16),
@@ -369,7 +290,7 @@ with cProfile.Profile() as profiler:
 
     ### Merge and save the training data ###
     ses_list = np.zeros((33080, 2))
-    for s in range(n_ses):
+    for s in range(NUMBER_OF_SESSIONS):
         if s == 0:
             white_data = whitened_train[s]
             img_cond = img_conditions_train[s]
@@ -381,8 +302,6 @@ with cProfile.Profile() as profiler:
         ses_list[start_index:end_index] = s
 
     del whitened_train
-    # print("ses_list", len(ses_list))
-
     # Data matrix of shape:
     # Image conditions × EGG repetitions × EEG channels × EEG time points
     merged_train = np.zeros(
@@ -447,12 +366,6 @@ with cProfile.Profile() as profiler:
     img_list = np.tile(np.array(images)[:, np.newaxis], (1, 4))
     text_list = np.tile(np.array(texts)[:, np.newaxis], (1, 4))
 
-    # print(merged_train.shape, merged_train.dtype)
-    # print(labels_list.shape, labels_list.dtype)
-    # print(img_list.shape)
-    # print(text_list.shape)
-    # print(sorted_session_list.shape)
-
     train_dict = {
         "eeg": merged_train.astype(np.float16),
         "label": labels_list,
@@ -471,7 +384,8 @@ with cProfile.Profile() as profiler:
 
 stats = pstats.Stats(profiler)
 stats.sort_stats(pstats.SortKey.CUMULATIVE)
-stats.print_stats()
-
-# Save to file including timestamp in name
-stats.dump_stats(f"preprocess_{datetime.now().strftime('%Y%m%d_%H%M%S')}.prof")
+stats.dump_stats(
+    os.path.join(
+        PROFILING_DIR, f"preprocess_{datetime.now().strftime('%Y%m%d_%H%M%S')}.prof"
+    )
+)
