@@ -10,6 +10,7 @@ version = "0.1.0"
 [feature.lint.tasks]
 pci = "pre-commit install"
 pc = "pre-commit run --all"
+mypy = "mypy ."
 [dependencies]
 pytorch-gpu = "*"
 mne = ">=1.10.2,<2"
@@ -21,10 +22,11 @@ tensorboard = ">=2.11.2,<3"
 tensorboardx = ">=2.6.2.2,<3"
 opencv = ">=4.6.0,<5"
 snakeviz = ">=2.2.2,<3"
+wandb = ">=0.22.3,<0.23"
 
 [feature.lint.dependencies]
 pre-commit = ">=4.3.0,<5"
-
+mypy = "*"
 
 [environments]
 lint = ["lint"]
